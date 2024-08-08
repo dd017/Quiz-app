@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .question-input {
+            margin-bottom: 20px;
+        }
+        .question-input textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .question-input input {
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .question-input button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .quiz-question {
+            margin-bottom: 20px;
+        }
+        .quiz-question h3 {
+            margin-bottom: 10px;
+        }
+        .quiz-question input[type="radio"] {
+            margin-right: 10px;
+        }
+        .quiz-question button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .quiz-result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz App</h1>
+        <div class="question-input">
+            <h3>Enter a Question</h3>
+            <textarea id="question-text" placeholder="Enter your question"></textarea>
+            <input type="text" id="option1" placeholder="Option 1">
+            <input type="text" id="option2" placeholder="Option 2">
+            <input type="text" id="option3" placeholder="Option 3">
+            <input type="text" id="option4" placeholder="Option 4">
+            <input type="text" id="correct-answer" placeholder="Enter correct option number (1-4)">
+            <button onclick="addQuestion()">Add Question</button>
+        </div>
+        <div id="quiz-container"></div>
+        <div class="quiz-result" id="quiz-result"></div>
+    </div>
+
+    <script>
+        let questions = [];
+
+        function addQuestion() {
+            const questionText = document.getElementById('question-text').value;
+            const option1 = document.getElementById('option1').value;
+            const option2 = document.getElementById('option2').value;
+            const option3 = document.getElementById('option3').value;
+            const option4 = document.getElementById('option4').value;
+            const correctAnswer = document.getElementById('correct-answer').value;
+
+            if (questionText && option1 && option2 && option3 && option4 && correctAnswer) {
+                const question = {
+                    text: questionText,
+                    options: [option1, option2, option3, option4],
+                    correctAnswer: parseInt(correctAnswer) - 1
+                };
+                questions.push(question);
+                displayQuiz();
+                clearInputFields();
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+
+        function displayQuiz() {
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.innerHTML = '';
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('quiz-question');
+                questionDiv.innerHTML = `
+                    <h3>${index + 1}. ${question.text}</h3>
+                    <label><input type="radio" name="question${index}" value="0"> ${question.options[0]}</label><br>
+                    <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
+                    <label><input type="radio" name="question${index}" value="2"> ${question.options[2]}</label><br>
+                    <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label>
+                `;
+                quizContainer.appendChild(questionDiv);
+            });
+
+            const submitButton = document.createElement('button');
+            submitButton.innerText = 'Submit Quiz';
+            submitButton.onclick = submitQuiz;
+            quizContainer.appendChild(submitButton);
+        }
+
+        function clearInputFields() {
+            document.getElementById('question-text').value = '';
+            document.getElementById('option1').value = '';
+            document.getElementById('option2').value = '';
+            document.getElementById('option3').value = '';
+            document.getElementById('option4').value = '';
+            document.getElementById('correct-answer').value = '';
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            questions.forEach((question, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selectedOption && parseInt(selectedOption.value) === question.correctAnswer) {
+                    score++;
+                }
+            });
+
+            const quizResult = document.getElementById('quiz-result');
+            quizResult.innerText = `You scored ${score} out of ${questions.length}`;
+        }
+    </script>
+</body>
+</html>
