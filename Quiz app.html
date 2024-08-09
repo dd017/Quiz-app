@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Quiz App</title>
+    <title>Ultimate Quiz & Study Session App</title>
     <style>
+        /* CSS for styling */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -22,7 +23,7 @@
             text-align: center;
             color: #333;
         }
-        .friend-input, .question-input, .chat-section, .leaderboard {
+        .section {
             margin-bottom: 20px;
         }
         input, textarea, select {
@@ -43,39 +44,17 @@
         button:hover {
             background-color: #218838;
         }
-        .quiz-question, .doubt-item, .chat-message {
+        .quiz-question, .doubt-item, .chat-message, .session-item {
             margin-bottom: 20px;
             padding: 15px;
             background: #f9f9f9;
             border-radius: 5px;
             border: 1px solid #ddd;
         }
-        .quiz-question img, .quiz-question video {
-            max-width: 100%;
-            margin-bottom: 10px;
-        }
-        .timer {
-            font-weight: bold;
-            color: #ff5733;
-            margin-bottom: 20px;
-        }
-        .leaderboard {
+        .leaderboard, .chat-section, .session-section {
             background: #efefef;
             padding: 10px;
             border-radius: 8px;
-        }
-        .leaderboard h3 {
-            text-align: center;
-        }
-        .chat-section {
-            background: #eef2f7;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .chat-messages {
-            max-height: 200px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
         }
         .quick-reply {
             background: #007bff;
@@ -92,17 +71,17 @@
 </head>
 <body>
     <div class="container">
-        <h1>Ultimate Quiz App</h1>
+        <h1>Ultimate Quiz & Study Session App</h1>
 
-        <div class="friend-input">
+        <div class="section">
             <h3>Add a Friend</h3>
             <input type="text" id="friend-name" placeholder="Enter friend's name">
             <button onclick="addFriend()">Add Friend</button>
         </div>
 
-        <div id="friends-container" class="friends-list"></div>
+        <div id="friends-container"></div>
 
-        <div class="question-input">
+        <div class="section">
             <h3>Enter a Question</h3>
             <textarea id="question-text" placeholder="Enter your question"></textarea>
             <input type="text" id="option1" placeholder="Option 1">
@@ -116,19 +95,18 @@
         </div>
 
         <div id="quiz-container"></div>
-        <div class="timer" id="timer"></div>
-        <div class="quiz-result" id="quiz-result"></div>
-        <div class="results-list" id="results-list"></div>
-        <div class="doubt-section" id="doubt-section"></div>
+        <div id="quiz-result"></div>
+        <div id="results-list"></div>
+        <div id="doubt-section"></div>
 
-        <div class="leaderboard">
+        <div class="leaderboard section">
             <h3>Leaderboard</h3>
             <div id="leaderboard-container"></div>
         </div>
 
-        <div class="chat-section">
+        <div class="chat-section section">
             <h3>Chat with Friends</h3>
-            <div id="chat-messages" class="chat-messages"></div>
+            <div id="chat-messages"></div>
             <textarea id="chat-message-input" placeholder="Type your message..."></textarea>
             <button onclick="sendMessage()">Send Message</button>
             <div id="quick-replies">
@@ -136,6 +114,14 @@
                 <span class="quick-reply" onclick="sendQuickReply('I need help')">I need help</span>
                 <span class="quick-reply" onclick="sendQuickReply('Great job!')">Great job!</span>
             </div>
+        </div>
+
+        <div class="session-section section">
+            <h3>Start a Study Session</h3>
+            <input type="text" id="session-name" placeholder="Enter session name">
+            <button onclick="startSession()">Start Session</button>
+            <div id="session-container"></div>
+            <div id="friends-sessions"></div>
         </div>
     </div>
 
@@ -145,12 +131,12 @@
         let currentFriendIndex = 0;
         let doubts = [];
         let chatMessages = [];
-        let timer;
+        let sessions = [];
 
         function addFriend() {
             const friendName = document.getElementById('friend-name').value;
             if (friendName) {
-                friends.push({ name: friendName, score: 0, responses: [] });
+                friends.push({ name: friendName, score: 0, responses: [], sessions: 0 });
                 displayFriends();
                 document.getElementById('friend-name').value = '';
             } else {
@@ -160,10 +146,10 @@
 
         function displayFriends() {
             const friendsContainer = document.getElementById('friends-container');
-            friendsContainer.innerHTML = '';
+            friendsContainer.innerHTML = '<h3>Friends List:</h3>';
             friends.forEach((friend, index) => {
                 const friendDiv = document.createElement('div');
-                friendDiv.innerText = `${index + 1}. ${friend.name}`;
+                friendDiv.innerText = `${index + 1}. ${friend.name} (Sessions: ${friend.sessions})`;
                 friendsContainer.appendChild(friendDiv);
             });
             if (friends.length > 0) {
@@ -188,9 +174,6 @@
                     correctAnswer: parseInt(correctAnswer) - 1,
                     answerPool: [0, 0, 0, 0],
                     doubt: false,
-                    doubtResolved: false,
-                    resolver: null,
-                    resolvedAnswer: null,
                     hint: hint || '',
                     mediaUrl: mediaUrl || ''
                 };
@@ -219,7 +202,7 @@
                 const questionDiv = document.createElement('div');
                 questionDiv.classList.add('quiz-question');
                 questionDiv.innerHTML = `
-                    <h3>${index + 1}. ${question.text}</h3>
+                    <h4>${index + 1}. ${question.text}</h4>
                     ${question.mediaUrl ? `<img src="${question.mediaUrl}" alt="Question Media">` : ''}
                     <label><input type="radio" name="question${index}" value="0"> ${question.options[0]}</label><br>
                     <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
@@ -230,7 +213,6 @@
                 `;
                 quizContainer.appendChild(questionDiv);
             });
-            startTimer();
         }
 
         function showHint(questionIndex) {
@@ -245,23 +227,6 @@
             } else {
                 alert("This question is already marked as doubt.");
             }
-        }
-
-        function startTimer() {
-            let timeLeft = 60; // 60 seconds per question
-            const timerElement = document.getElementById('timer');
-            timerElement.innerHTML = `Time left: ${timeLeft} seconds`;
-
-            timer = setInterval(() => {
-                timeLeft--;
-                timerElement.innerHTML = `Time left: ${timeLeft} seconds`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    alert("Time's up!");
-                    submitQuiz();
-                }
-            }, 1000);
         }
 
         function submitQuiz() {
@@ -382,6 +347,45 @@
             const senderName = friends[currentFriendIndex - 1].name;
             chatMessages.push({ sender: senderName, text: replyText });
             displayChatSection();
+        }
+
+        // Study Session Features
+        function startSession() {
+            const sessionName = document.getElementById('session-name').value;
+            if (sessionName) {
+                const friend = friends[currentFriendIndex - 1];
+                friend.sessions++;
+                sessions.push({ sessionName: sessionName, startedBy: friend.name });
+                displaySessions();
+                document.getElementById('session-name').value = '';
+            } else {
+                alert('Please enter a session name.');
+            }
+        }
+
+        function displaySessions() {
+            const sessionContainer = document.getElementById('session-container');
+            sessionContainer.innerHTML = '<h4>Your Study Sessions</h4>';
+            const friend = friends[currentFriendIndex - 1];
+            sessions.forEach(session => {
+                if (session.startedBy === friend.name) {
+                    const sessionItem = document.createElement('div');
+                    sessionItem.classList.add('session-item');
+                    sessionItem.innerHTML = `${session.sessionName} (Started by ${session.startedBy})`;
+                    sessionContainer.appendChild(sessionItem);
+                }
+            });
+
+            const friendsSessionsContainer = document.getElementById('friends-sessions');
+            friendsSessionsContainer.innerHTML = '<h4>Friends\' Study Sessions</h4>';
+            sessions.forEach(session => {
+                if (session.startedBy !== friend.name) {
+                    const sessionItem = document.createElement('div');
+                    sessionItem.classList.add('session-item');
+                    sessionItem.innerHTML = `${session.sessionName} (Started by ${session.startedBy})`;
+                    friendsSessionsContainer.appendChild(sessionItem);
+                }
+            });
         }
     </script>
 </body>
