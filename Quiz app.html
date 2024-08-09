@@ -3,55 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Quiz App with Doubts and Chat</title>
+    <title>Ultimate Quiz App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f4f4f4;
         }
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .friend-input, .question-input, .chat-section {
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .friend-input, .question-input, .chat-section, .leaderboard {
             margin-bottom: 20px;
         }
-        textarea, input {
-            width: 100%;
+        input, textarea, select {
+            width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button {
-            padding: 10px;
-            background-color: #4CAF50;
+            padding: 10px 15px;
+            background-color: #28a745;
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 4px;
         }
-        .quiz-question {
+        button:hover {
+            background-color: #218838;
+        }
+        .quiz-question, .doubt-item, .chat-message {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .quiz-question img, .quiz-question video {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        .timer {
+            font-weight: bold;
+            color: #ff5733;
             margin-bottom: 20px;
         }
-        .quiz-result, .doubt-section, .chat-section {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-        .friends-list, .results-list, .chat-messages {
-            margin-top: 20px;
-        }
-        .results-list h3, .doubt-section h3, .chat-section h3 {
-            margin-bottom: 10px;
-        }
-        .doubt-item, .chat-message {
-            border: 1px solid #ccc;
+        .leaderboard {
+            background: #efefef;
             padding: 10px;
+            border-radius: 8px;
+        }
+        .leaderboard h3 {
+            text-align: center;
+        }
+        .chat-section {
+            background: #eef2f7;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .chat-messages {
+            max-height: 200px;
+            overflow-y: scroll;
             margin-bottom: 10px;
+        }
+        .quick-reply {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .quick-reply:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Advanced Quiz App with Doubts and Chat</h1>
+        <h1>Ultimate Quiz App</h1>
 
         <div class="friend-input">
             <h3>Add a Friend</h3>
@@ -69,19 +110,32 @@
             <input type="text" id="option3" placeholder="Option 3">
             <input type="text" id="option4" placeholder="Option 4">
             <input type="text" id="correct-answer" placeholder="Enter correct option number (1-4)">
+            <input type="text" id="hint" placeholder="Enter hint (optional)">
+            <input type="text" id="media-url" placeholder="Enter image/video URL (optional)">
             <button onclick="addQuestion()">Add Question</button>
         </div>
 
         <div id="quiz-container"></div>
+        <div class="timer" id="timer"></div>
         <div class="quiz-result" id="quiz-result"></div>
         <div class="results-list" id="results-list"></div>
         <div class="doubt-section" id="doubt-section"></div>
+
+        <div class="leaderboard">
+            <h3>Leaderboard</h3>
+            <div id="leaderboard-container"></div>
+        </div>
 
         <div class="chat-section">
             <h3>Chat with Friends</h3>
             <div id="chat-messages" class="chat-messages"></div>
             <textarea id="chat-message-input" placeholder="Type your message..."></textarea>
             <button onclick="sendMessage()">Send Message</button>
+            <div id="quick-replies">
+                <span class="quick-reply" onclick="sendQuickReply('Hello!')">Hello!</span>
+                <span class="quick-reply" onclick="sendQuickReply('I need help')">I need help</span>
+                <span class="quick-reply" onclick="sendQuickReply('Great job!')">Great job!</span>
+            </div>
         </div>
     </div>
 
@@ -91,6 +145,7 @@
         let currentFriendIndex = 0;
         let doubts = [];
         let chatMessages = [];
+        let timer;
 
         function addFriend() {
             const friendName = document.getElementById('friend-name').value;
@@ -123,6 +178,8 @@
             const option3 = document.getElementById('option3').value;
             const option4 = document.getElementById('option4').value;
             const correctAnswer = document.getElementById('correct-answer').value;
+            const hint = document.getElementById('hint').value;
+            const mediaUrl = document.getElementById('media-url').value;
 
             if (questionText && option1 && option2 && option3 && option4 && correctAnswer) {
                 const question = {
@@ -133,13 +190,26 @@
                     doubt: false,
                     doubtResolved: false,
                     resolver: null,
-                    resolvedAnswer: null
+                    resolvedAnswer: null,
+                    hint: hint || '',
+                    mediaUrl: mediaUrl || ''
                 };
                 questions.push(question);
                 clearInputFields();
             } else {
                 alert("Please fill in all fields.");
             }
+        }
+
+        function clearInputFields() {
+            document.getElementById('question-text').value = '';
+            document.getElementById('option1').value = '';
+            document.getElementById('option2').value = '';
+            document.getElementById('option3').value = '';
+            document.getElementById('option4').value = '';
+            document.getElementById('correct-answer').value = '';
+            document.getElementById('hint').value = '';
+            document.getElementById('media-url').value = '';
         }
 
         function displayQuiz(friendIndex) {
@@ -150,78 +220,79 @@
                 questionDiv.classList.add('quiz-question');
                 questionDiv.innerHTML = `
                     <h3>${index + 1}. ${question.text}</h3>
+                    ${question.mediaUrl ? `<img src="${question.mediaUrl}" alt="Question Media">` : ''}
                     <label><input type="radio" name="question${index}" value="0"> ${question.options[0]}</label><br>
                     <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
                     <label><input type="radio" name="question${index}" value="2"> ${question.options[2]}</label><br>
                     <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label><br>
-                    <button onclick="markAsDoubt(${index})">Mark as Doubt</button>
+                    <button onclick="showHint(${index})">Show Hint</button>
+                    <button onclick="markDoubt(${index})">Mark as Doubt</button>
                 `;
                 quizContainer.appendChild(questionDiv);
             });
-
-            const submitButton = document.createElement('button');
-            submitButton.innerText = 'Submit Quiz';
-            submitButton.onclick = () => submitQuiz(friendIndex);
-            quizContainer.appendChild(submitButton);
+            startTimer();
         }
 
-        function markAsDoubt(questionIndex) {
-            questions[questionIndex].doubt = true;
-            doubts.push(questionIndex);
-            alert('Marked as doubt!');
+        function showHint(questionIndex) {
+            alert(questions[questionIndex].hint || "No hint available for this question.");
         }
 
-        function clearInputFields() {
-            document.getElementById('question-text').value = '';
-            document.getElementById('option1').value = '';
-            document.getElementById('option2').value = '';
-            document.getElementById('option3').value = '';
-            document.getElementById('option4').value = '';
-            document.getElementById('correct-answer').value = '';
+        function markDoubt(questionIndex) {
+            if (!questions[questionIndex].doubt) {
+                questions[questionIndex].doubt = true;
+                doubts.push(questionIndex);
+                alert("Marked as doubt!");
+            } else {
+                alert("This question is already marked as doubt.");
+            }
         }
 
-        function submitQuiz(friendIndex) {
-            const friend = friends[friendIndex];
+        function startTimer() {
+            let timeLeft = 60; // 60 seconds per question
+            const timerElement = document.getElementById('timer');
+            timerElement.innerHTML = `Time left: ${timeLeft} seconds`;
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timerElement.innerHTML = `Time left: ${timeLeft} seconds`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("Time's up!");
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function submitQuiz() {
+            const friend = friends[currentFriendIndex];
+            let score = 0;
             questions.forEach((question, index) => {
                 const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
                 if (selectedOption) {
                     const selectedValue = parseInt(selectedOption.value);
-                    friend.responses.push(selectedValue);
-                    question.answerPool[selectedValue] += 1;
+                    question.answerPool[selectedValue]++;
                     if (selectedValue === question.correctAnswer) {
-                        friend.score += 1;
+                        score++;
                     }
-                } else {
-                    friend.responses.push(null);
                 }
             });
-
+            friend.score = score;
             currentFriendIndex++;
             if (currentFriendIndex < friends.length) {
                 displayQuiz(currentFriendIndex);
             } else {
                 displayResults();
-                displayAnswerPool();
-                displayDoubtSection();
-                displayChatSection();
+                displayLeaderboard();
             }
         }
 
         function displayResults() {
             const quizResult = document.getElementById('quiz-result');
-            quizResult.innerHTML = '<h3>Final Scores</h3>';
-            friends.forEach(friend => {
-                const friendResult = document.createElement('div');
-                friendResult.innerText = `${friend.name} scored ${friend.score} out of ${questions.length}`;
-                quizResult.appendChild(friendResult);
-            });
-        }
-
-        function displayAnswerPool() {
-            const resultsList = document.getElementById('results-list');
-            resultsList.innerHTML = '<h3>Answer Pool</h3>';
+            quizResult.innerHTML = `<h3>Quiz Completed!</h3>`;
             questions.forEach((question, index) => {
                 const questionPool = document.createElement('div');
+                questionPool.classList.add('quiz-question');
                 questionPool.innerHTML = `
                     <h4>${index + 1}. ${question.text}</h4>
                     <p>Option 1: ${question.options[0]} - ${question.answerPool[0]} votes</p>
@@ -230,7 +301,18 @@
                     <p>Option 4: ${question.options[3]} - ${question.answerPool[3]} votes</p>
                     <p>Correct Answer: <strong>${question.options[question.correctAnswer]}</strong></p>
                 `;
-                resultsList.appendChild(questionPool);
+                document.getElementById('results-list').appendChild(questionPool);
+            });
+        }
+
+        function displayLeaderboard() {
+            const leaderboardContainer = document.getElementById('leaderboard-container');
+            leaderboardContainer.innerHTML = '';
+            friends.sort((a, b) => b.score - a.score);
+            friends.forEach((friend, index) => {
+                const friendDiv = document.createElement('div');
+                friendDiv.innerHTML = `${index + 1}. ${friend.name} - ${friend.score} points`;
+                leaderboardContainer.appendChild(friendDiv);
             });
         }
 
@@ -294,6 +376,12 @@
             } else {
                 alert('Please enter a message.');
             }
+        }
+
+        function sendQuickReply(replyText) {
+            const senderName = friends[currentFriendIndex - 1].name;
+            chatMessages.push({ sender: senderName, text: replyText });
+            displayChatSection();
         }
     </script>
 </body>
