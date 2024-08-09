@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Quiz App with Doubts</title>
+    <title>Advanced Quiz App with Doubts and Chat</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        .friend-input, .question-input {
+        .friend-input, .question-input, .chat-section {
             margin-bottom: 20px;
         }
         textarea, input {
@@ -31,18 +31,18 @@
         .quiz-question {
             margin-bottom: 20px;
         }
-        .quiz-result, .doubt-section {
+        .quiz-result, .doubt-section, .chat-section {
             font-size: 20px;
             font-weight: bold;
             margin-top: 20px;
         }
-        .friends-list, .results-list {
+        .friends-list, .results-list, .chat-messages {
             margin-top: 20px;
         }
-        .results-list h3, .doubt-section h3 {
+        .results-list h3, .doubt-section h3, .chat-section h3 {
             margin-bottom: 10px;
         }
-        .doubt-item {
+        .doubt-item, .chat-message {
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 10px;
@@ -51,7 +51,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Advanced Quiz App with Doubts</h1>
+        <h1>Advanced Quiz App with Doubts and Chat</h1>
 
         <div class="friend-input">
             <h3>Add a Friend</h3>
@@ -76,6 +76,13 @@
         <div class="quiz-result" id="quiz-result"></div>
         <div class="results-list" id="results-list"></div>
         <div class="doubt-section" id="doubt-section"></div>
+
+        <div class="chat-section">
+            <h3>Chat with Friends</h3>
+            <div id="chat-messages" class="chat-messages"></div>
+            <textarea id="chat-message-input" placeholder="Type your message..."></textarea>
+            <button onclick="sendMessage()">Send Message</button>
+        </div>
     </div>
 
     <script>
@@ -83,6 +90,7 @@
         let friends = [];
         let currentFriendIndex = 0;
         let doubts = [];
+        let chatMessages = [];
 
         function addFriend() {
             const friendName = document.getElementById('friend-name').value;
@@ -195,6 +203,7 @@
                 displayResults();
                 displayAnswerPool();
                 displayDoubtSection();
+                displayChatSection();
             }
         }
 
@@ -219,7 +228,7 @@
                     <p>Option 2: ${question.options[1]} - ${question.answerPool[1]} votes</p>
                     <p>Option 3: ${question.options[2]} - ${question.answerPool[2]} votes</p>
                     <p>Option 4: ${question.options[3]} - ${question.answerPool[3]} votes</p>
-                    <p><strong>Correct Answer: ${question.options[question.correctAnswer]}</strong></p>
+                    <p>Correct Answer: <strong>${question.options[question.correctAnswer]}</strong></p>
                 `;
                 resultsList.appendChild(questionPool);
             });
@@ -260,6 +269,30 @@
                 displayDoubtSection();
             } else {
                 alert('Please enter a valid option number (1-4).');
+            }
+        }
+
+        function displayChatSection() {
+            const chatMessagesContainer = document.getElementById('chat-messages');
+            chatMessagesContainer.innerHTML = '';
+            chatMessages.forEach(message => {
+                const chatMessageDiv = document.createElement('div');
+                chatMessageDiv.classList.add('chat-message');
+                chatMessageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
+                chatMessagesContainer.appendChild(chatMessageDiv);
+            });
+        }
+
+        function sendMessage() {
+            const chatMessageInput = document.getElementById('chat-message-input');
+            const chatMessageText = chatMessageInput.value.trim();
+            if (chatMessageText) {
+                const senderName = friends[currentFriendIndex - 1].name;
+                chatMessages.push({ sender: senderName, text: chatMessageText });
+                chatMessageInput.value = '';
+                displayChatSection();
+            } else {
+                alert('Please enter a message.');
             }
         }
     </script>
