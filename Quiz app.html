@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Quiz App</title>
+    <title>Advanced Quiz App with Doubts</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,7 +31,7 @@
         .quiz-question {
             margin-bottom: 20px;
         }
-        .quiz-result {
+        .quiz-result, .doubt-section {
             font-size: 20px;
             font-weight: bold;
             margin-top: 20px;
@@ -39,14 +39,19 @@
         .friends-list, .results-list {
             margin-top: 20px;
         }
-        .results-list h3 {
+        .results-list h3, .doubt-section h3 {
+            margin-bottom: 10px;
+        }
+        .doubt-item {
+            border: 1px solid #ccc;
+            padding: 10px;
             margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Advanced Quiz App</h1>
+        <h1>Advanced Quiz App with Doubts</h1>
 
         <div class="friend-input">
             <h3>Add a Friend</h3>
@@ -70,12 +75,14 @@
         <div id="quiz-container"></div>
         <div class="quiz-result" id="quiz-result"></div>
         <div class="results-list" id="results-list"></div>
+        <div class="doubt-section" id="doubt-section"></div>
     </div>
 
     <script>
         let questions = [];
         let friends = [];
         let currentFriendIndex = 0;
+        let doubts = [];
 
         function addFriend() {
             const friendName = document.getElementById('friend-name').value;
@@ -114,7 +121,11 @@
                     text: questionText,
                     options: [option1, option2, option3, option4],
                     correctAnswer: parseInt(correctAnswer) - 1,
-                    answerPool: [0, 0, 0, 0]  // Tracks how many people chose each option
+                    answerPool: [0, 0, 0, 0],
+                    doubt: false,
+                    doubtResolved: false,
+                    resolver: null,
+                    resolvedAnswer: null
                 };
                 questions.push(question);
                 clearInputFields();
@@ -134,7 +145,8 @@
                     <label><input type="radio" name="question${index}" value="0"> ${question.options[0]}</label><br>
                     <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
                     <label><input type="radio" name="question${index}" value="2"> ${question.options[2]}</label><br>
-                    <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label>
+                    <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label><br>
+                    <button onclick="markAsDoubt(${index})">Mark as Doubt</button>
                 `;
                 quizContainer.appendChild(questionDiv);
             });
@@ -143,6 +155,12 @@
             submitButton.innerText = 'Submit Quiz';
             submitButton.onclick = () => submitQuiz(friendIndex);
             quizContainer.appendChild(submitButton);
+        }
+
+        function markAsDoubt(questionIndex) {
+            questions[questionIndex].doubt = true;
+            doubts.push(questionIndex);
+            alert('Marked as doubt!');
         }
 
         function clearInputFields() {
@@ -176,6 +194,7 @@
             } else {
                 displayResults();
                 displayAnswerPool();
+                displayDoubtSection();
             }
         }
 
@@ -204,6 +223,44 @@
                 `;
                 resultsList.appendChild(questionPool);
             });
+        }
+
+        function displayDoubtSection() {
+            const doubtSection = document.getElementById('doubt-section');
+            doubtSection.innerHTML = '<h3>Doubt Resolution</h3>';
+            doubts.forEach(doubtIndex => {
+                const doubtItem = document.createElement('div');
+                doubtItem.classList.add('doubt-item');
+                const question = questions[doubtIndex];
+                doubtItem.innerHTML = `
+                    <h4>${question.text}</h4>
+                    <p>Current Doubt: ${question.doubtResolved ? "Resolved" : "Unresolved"}</p>
+                    ${!question.doubtResolved ? `
+                    <p><strong>Options:</strong></p>
+                    <p>1: ${question.options[0]}</p>
+                    <p>2: ${question.options[1]}</p>
+                    <p>3: ${question.options[2]}</p>
+                    <p>4: ${question.options[3]}</p>
+                    <input type="text" id="resolved-answer-${doubtIndex}" placeholder="Enter the correct option number (1-4)">
+                    <button onclick="resolveDoubt(${doubtIndex})">Resolve Doubt</button>
+                    ` : `<p><strong>Resolved by:</strong> ${question.resolver}</p><p><strong>Resolved Answer:</strong> ${question.options[question.resolvedAnswer]}</p>`}
+                `;
+                doubtSection.appendChild(doubtItem);
+            });
+        }
+
+        function resolveDoubt(doubtIndex) {
+            const resolvedAnswerInput = document.getElementById(`resolved-answer-${doubtIndex}`);
+            const resolvedAnswer = parseInt(resolvedAnswerInput.value) - 1;
+            if (resolvedAnswer >= 0 && resolvedAnswer <= 3) {
+                questions[doubtIndex].doubtResolved = true;
+                questions[doubtIndex].resolvedAnswer = resolvedAnswer;
+                questions[doubtIndex].resolver = friends[currentFriendIndex - 1].name;
+                alert('Doubt resolved!');
+                displayDoubtSection();
+            } else {
+                alert('Please enter a valid option number (1-4).');
+            }
         }
     </script>
 </body>
