@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz App</title>
+    <title>Quiz App with Friends</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,20 +13,15 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        .question-input {
+        .question-input, .friend-input {
             margin-bottom: 20px;
         }
-        .question-input textarea {
+        textarea, input {
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
         }
-        .question-input input {
-            padding: 10px;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .question-input button {
+        button {
             padding: 10px;
             background-color: #4CAF50;
             color: white;
@@ -39,26 +34,28 @@
         .quiz-question h3 {
             margin-bottom: 10px;
         }
-        .quiz-question input[type="radio"] {
-            margin-right: 10px;
-        }
-        .quiz-question button {
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
         .quiz-result {
             font-size: 20px;
             font-weight: bold;
+            margin-top: 20px;
+        }
+        .friends-list {
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Quiz App</h1>
+        <h1>Quiz App with Friends</h1>
+
+        <div class="friend-input">
+            <h3>Add a Friend</h3>
+            <input type="text" id="friend-name" placeholder="Enter friend's name">
+            <button onclick="addFriend()">Add Friend</button>
+        </div>
+
+        <div id="friends-container" class="friends-list"></div>
+
         <div class="question-input">
             <h3>Enter a Question</h3>
             <textarea id="question-text" placeholder="Enter your question"></textarea>
@@ -69,12 +66,35 @@
             <input type="text" id="correct-answer" placeholder="Enter correct option number (1-4)">
             <button onclick="addQuestion()">Add Question</button>
         </div>
+
         <div id="quiz-container"></div>
         <div class="quiz-result" id="quiz-result"></div>
     </div>
 
     <script>
         let questions = [];
+        let friends = [];
+
+        function addFriend() {
+            const friendName = document.getElementById('friend-name').value;
+            if (friendName) {
+                friends.push({ name: friendName, score: 0 });
+                displayFriends();
+                document.getElementById('friend-name').value = '';
+            } else {
+                alert("Please enter a friend's name.");
+            }
+        }
+
+        function displayFriends() {
+            const friendsContainer = document.getElementById('friends-container');
+            friendsContainer.innerHTML = '';
+            friends.forEach((friend, index) => {
+                const friendDiv = document.createElement('div');
+                friendDiv.innerText = `${index + 1}. ${friend.name}`;
+                friendsContainer.appendChild(friendDiv);
+            });
+        }
 
         function addQuestion() {
             const questionText = document.getElementById('question-text').value;
@@ -130,16 +150,31 @@
         }
 
         function submitQuiz() {
-            let score = 0;
             questions.forEach((question, index) => {
-                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-                if (selectedOption && parseInt(selectedOption.value) === question.correctAnswer) {
-                    score++;
-                }
+                const selectedOptions = document.getElementsByName(`question${index}`);
+                selectedOptions.forEach((option) => {
+                    if (option.checked) {
+                        friends.forEach(friend => {
+                            const scoreElement = document.getElementById(`score-${friend.name}`);
+                            if (parseInt(option.value) === question.correctAnswer) {
+                                friend.score += 1;
+                            }
+                        });
+                    }
+                });
             });
 
+            displayResults();
+        }
+
+        function displayResults() {
             const quizResult = document.getElementById('quiz-result');
-            quizResult.innerText = `You scored ${score} out of ${questions.length}`;
+            quizResult.innerHTML = '';
+            friends.forEach(friend => {
+                const friendResult = document.createElement('div');
+                friendResult.innerText = `${friend.name} scored ${friend.score} out of ${questions.length}`;
+                quizResult.appendChild(friendResult);
+            });
         }
     </script>
 </body>
