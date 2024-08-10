@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Quiz & Study Session App</title>
     <style>
-        /* CSS for styling */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -44,14 +43,14 @@
         button:hover {
             background-color: #218838;
         }
-        .quiz-question, .doubt-item, .chat-message, .session-item {
+        .quiz-question, .doubt-item, .chat-message, .session-item, .review-item, .group-chat-message {
             margin-bottom: 20px;
             padding: 15px;
             background: #f9f9f9;
             border-radius: 5px;
             border: 1px solid #ddd;
         }
-        .leaderboard, .chat-section, .session-section {
+        .leaderboard, .chat-section, .group-chat-section, .session-section, .review-section {
             background: #efefef;
             padding: 10px;
             border-radius: 8px;
@@ -104,6 +103,11 @@
             <div id="leaderboard-container"></div>
         </div>
 
+        <div class="review-section section">
+            <h3>Review Quiz Results</h3>
+            <div id="review-container"></div>
+        </div>
+
         <div class="chat-section section">
             <h3>Chat with Friends</h3>
             <div id="chat-messages"></div>
@@ -114,6 +118,13 @@
                 <span class="quick-reply" onclick="sendQuickReply('I need help')">I need help</span>
                 <span class="quick-reply" onclick="sendQuickReply('Great job!')">Great job!</span>
             </div>
+        </div>
+
+        <div class="group-chat-section section">
+            <h3>Group Chat</h3>
+            <div id="group-chat-messages"></div>
+            <textarea id="group-chat-message-input" placeholder="Type your group message..."></textarea>
+            <button onclick="sendGroupMessage()">Send Group Message</button>
         </div>
 
         <div class="session-section section">
@@ -131,7 +142,9 @@
         let currentFriendIndex = 0;
         let doubts = [];
         let chatMessages = [];
+        let groupChatMessages = [];
         let sessions = [];
+        let reviews = [];
 
         function addFriend() {
             const friendName = document.getElementById('friend-name').value;
@@ -208,18 +221,15 @@
                     <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
                     <label><input type="radio" name="question${index}" value="2"> ${question.options[2]}</label><br>
                     <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label><br>
-                    <button onclick="showHint(${index})">Show Hint</button>
-                    <button onclick="markDoubt(${index})">Mark as Doubt</button>
+                    ${question.hint ? `<p><strong>Hint:</strong> ${question.hint}</p>` : ''}
+                    <button onclick="markAsDoubt(${index})">Mark as Doubt</button>
                 `;
                 quizContainer.appendChild(questionDiv);
             });
+            quizContainer.innerHTML += '<button onclick="submitQuiz()">Submit Quiz</button>';
         }
 
-        function showHint(questionIndex) {
-            alert(questions[questionIndex].hint || "No hint available for this question.");
-        }
-
-        function markDoubt(questionIndex) {
+        function markAsDoubt(questionIndex) {
             if (!questions[questionIndex].doubt) {
                 questions[questionIndex].doubt = true;
                 doubts.push(questionIndex);
@@ -232,23 +242,28 @@
         function submitQuiz() {
             const friend = friends[currentFriendIndex];
             let score = 0;
+            const responses = [];
             questions.forEach((question, index) => {
                 const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
                 if (selectedOption) {
                     const selectedValue = parseInt(selectedOption.value);
                     question.answerPool[selectedValue]++;
+                    responses.push(selectedValue);
                     if (selectedValue === question.correctAnswer) {
                         score++;
                     }
                 }
             });
             friend.score = score;
+            friend.responses = responses;
+            reviews.push({ friendName: friend.name, score: score, responses: responses });
             currentFriendIndex++;
             if (currentFriendIndex < friends.length) {
                 displayQuiz(currentFriendIndex);
             } else {
                 displayResults();
                 displayLeaderboard();
+                displayReviewSection();
             }
         }
 
@@ -279,6 +294,28 @@
                 friendDiv.innerHTML = `${index + 1}. ${friend.name} - ${friend.score} points`;
                 leaderboardContainer.appendChild(friendDiv);
             });
+        }
+
+        function displayReviewSection() {
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+            reviews.forEach(review => {
+                const reviewDiv = document.createElement('div');
+                reviewDiv.classList.add('review-item');
+                reviewDiv.innerHTML = `
+                    <h4>Review of ${review.friendName}'s Quiz</h4>
+                    <p>Score: ${review.score}</p>
+                    ${review.responses.map((response, index) => `
+                    <p>Q${index + 1}: ${questions[index].options[response]} (Correct: ${questions[index].options[questions[index].correctAnswer]})</p>`).join('')}
+                    <textarea placeholder="Leave a review..."></textarea>
+                    <button onclick="submitReview('${review.friendName}')">Submit Review</button>
+                `;
+                reviewContainer.appendChild(reviewDiv);
+            });
+        }
+
+        function submitReview(friendName) {
+            alert(`Review for ${friendName} submitted!`);
         }
 
         function displayDoubtSection() {
@@ -349,6 +386,30 @@
             displayChatSection();
         }
 
+        function displayGroupChatSection() {
+            const groupChatMessagesContainer = document.getElementById('group-chat-messages');
+            groupChatMessagesContainer.innerHTML = '';
+            groupChatMessages.forEach(message => {
+                const groupChatMessageDiv = document.createElement('div');
+                groupChatMessageDiv.classList.add('group-chat-message');
+                groupChatMessageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
+                groupChatMessagesContainer.appendChild(groupChatMessageDiv);
+            });
+        }
+
+        function sendGroupMessage() {
+            const groupChatMessageInput = document.getElementById('group-chat-message-input');
+            const groupChatMessageText = groupChatMessageInput.value.trim();
+            if (groupChatMessageText) {
+                const senderName = friends[currentFriendIndex - 1].name;
+                groupChatMessages.push({ sender: senderName, text: groupChatMessageText });
+                groupChatMessageInput.value = '';
+                displayGroupChatSection();
+            } else {
+                alert('Please enter a message.');
+            }
+        }
+
         // Study Session Features
         function startSession() {
             const sessionName = document.getElementById('session-name').value;
@@ -377,7 +438,7 @@
             });
 
             const friendsSessionsContainer = document.getElementById('friends-sessions');
-            friendsSessionsContainer.innerHTML = '<h4>Friends\' Study Sessions</h4>';
+            friendsSessionsContainer.innerHTML = '<h4>Friends\' Sessions</h4>';
             sessions.forEach(session => {
                 if (session.startedBy !== friend.name) {
                     const sessionItem = document.createElement('div');
