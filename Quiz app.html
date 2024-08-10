@@ -3,451 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Quiz & Study Session App</title>
+    <title>Advanced Quiz App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
             background-color: #f4f4f4;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h1 {
-            text-align: center;
-            color: #333;
+        h3, h4 {
+            margin-top: 20px;
         }
-        .section {
-            margin-bottom: 20px;
-        }
-        input, textarea, select {
-            width: calc(100% - 22px);
-            padding: 10px;
+        .quiz-question, .channel-item, .session-item, .doubt-item, .chat-message, .group-chat-message, .review-item {
             margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .quiz-question, .doubt-item, .chat-message, .session-item, .review-item, .group-chat-message {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        .leaderboard, .chat-section, .group-chat-section, .session-section, .review-section {
-            background: #efefef;
             padding: 10px;
-            border-radius: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
         }
-        .quick-reply {
-            background: #007bff;
-            color: white;
-            padding: 5px 10px;
-            margin-right: 5px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .quick-reply:hover {
-            background: #0056b3;
+        .channel-item {
+            background-color: #e0f7fa;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Ultimate Quiz & Study Session App</h1>
 
-        <div class="section">
-            <h3>Add a Friend</h3>
-            <input type="text" id="friend-name" placeholder="Enter friend's name">
-            <button onclick="addFriend()">Add Friend</button>
-        </div>
+<h2>Advanced Quiz App</h2>
 
-        <div id="friends-container"></div>
+<div id="channel-container">
+    <h3>Your Channels</h3>
+    <div id="your-channels"></div>
+    <input type="text" id="new-channel-name" placeholder="Enter new channel name">
+    <button onclick="createChannel()">Create Channel</button>
+</div>
 
-        <div class="section">
-            <h3>Enter a Question</h3>
-            <textarea id="question-text" placeholder="Enter your question"></textarea>
-            <input type="text" id="option1" placeholder="Option 1">
-            <input type="text" id="option2" placeholder="Option 2">
-            <input type="text" id="option3" placeholder="Option 3">
-            <input type="text" id="option4" placeholder="Option 4">
-            <input type="text" id="correct-answer" placeholder="Enter correct option number (1-4)">
-            <input type="text" id="hint" placeholder="Enter hint (optional)">
-            <input type="text" id="media-url" placeholder="Enter image/video URL (optional)">
-            <button onclick="addQuestion()">Add Question</button>
-        </div>
+<div id="friends-container">
+    <h3>Friends</h3>
+    <div id="friends-list"></div>
+    <input type="text" id="new-friend-name" placeholder="Enter friend's name">
+    <button onclick="addFriend()">Add Friend</button>
+</div>
 
-        <div id="quiz-container"></div>
-        <div id="quiz-result"></div>
-        <div id="results-list"></div>
-        <div id="doubt-section"></div>
+<div id="quiz-container"></div>
+<div id="quiz-result"></div>
+<div id="results-list"></div>
+<div id="leaderboard-container"></div>
+<div id="review-container"></div>
 
-        <div class="leaderboard section">
-            <h3>Leaderboard</h3>
-            <div id="leaderboard-container"></div>
-        </div>
+<div id="doubt-section"></div>
 
-        <div class="review-section section">
-            <h3>Review Quiz Results</h3>
-            <div id="review-container"></div>
-        </div>
+<h3>Chat</h3>
+<div id="chat-messages"></div>
+<input type="text" id="chat-message-input" placeholder="Enter your message">
+<button onclick="sendMessage()">Send</button>
 
-        <div class="chat-section section">
-            <h3>Chat with Friends</h3>
-            <div id="chat-messages"></div>
-            <textarea id="chat-message-input" placeholder="Type your message..."></textarea>
-            <button onclick="sendMessage()">Send Message</button>
-            <div id="quick-replies">
-                <span class="quick-reply" onclick="sendQuickReply('Hello!')">Hello!</span>
-                <span class="quick-reply" onclick="sendQuickReply('I need help')">I need help</span>
-                <span class="quick-reply" onclick="sendQuickReply('Great job!')">Great job!</span>
-            </div>
-        </div>
+<h3>Group Chat</h3>
+<div id="group-chat-messages"></div>
+<input type="text" id="group-chat-message-input" placeholder="Enter your group message">
+<button onclick="sendGroupMessage()">Send</button>
 
-        <div class="group-chat-section section">
-            <h3>Group Chat</h3>
-            <div id="group-chat-messages"></div>
-            <textarea id="group-chat-message-input" placeholder="Type your group message..."></textarea>
-            <button onclick="sendGroupMessage()">Send Group Message</button>
-        </div>
+<h3>Study Sessions</h3>
+<div id="session-container"></div>
+<input type="text" id="session-name" placeholder="Enter session name">
+<button onclick="startSession()">Start Session</button>
 
-        <div class="session-section section">
-            <h3>Start a Study Session</h3>
-            <input type="text" id="session-name" placeholder="Enter session name">
-            <button onclick="startSession()">Start Session</button>
-            <div id="session-container"></div>
-            <div id="friends-sessions"></div>
-        </div>
-    </div>
+<div id="friends-sessions"></div>
 
-    <script>
-        let questions = [];
-        let friends = [];
-        let currentFriendIndex = 0;
-        let doubts = [];
-        let chatMessages = [];
-        let groupChatMessages = [];
-        let sessions = [];
-        let reviews = [];
+<script>
+    const friends = [];
+    const channels = [];
+    let currentChannelIndex = -1;
+    let currentFriendIndex = 0;
+    const questions = [
+        {
+            text: "What is the capital of France?",
+            options: ["Berlin", "Madrid", "Paris", "Rome"],
+            correctAnswer: 2,
+            answerPool: [0, 0, 0, 0],
+            doubt: false,
+            doubtResolved: false,
+            hint: "It's known as the City of Light."
+        },
+        // Add more questions here...
+    ];
+    const doubts = [];
+    const reviews = [];
+    const chatMessages = [];
+    const groupChatMessages = [];
+    const sessions = [];
 
-        function addFriend() {
-            const friendName = document.getElementById('friend-name').value;
-            if (friendName) {
-                friends.push({ name: friendName, score: 0, responses: [], sessions: 0 });
-                displayFriends();
-                document.getElementById('friend-name').value = '';
-            } else {
-                alert("Please enter a friend's name.");
-            }
+    function addFriend() {
+        const friendName = document.getElementById('new-friend-name').value;
+        if (friendName) {
+            friends.push({ name: friendName, score: 0, responses: [], sessions: 0 });
+            displayFriends();
+            document.getElementById('new-friend-name').value = '';
+        } else {
+            alert('Please enter a friend\'s name.');
         }
+    }
 
-        function displayFriends() {
-            const friendsContainer = document.getElementById('friends-container');
-            friendsContainer.innerHTML = '<h3>Friends List:</h3>';
-            friends.forEach((friend, index) => {
-                const friendDiv = document.createElement('div');
-                friendDiv.innerText = `${index + 1}. ${friend.name} (Sessions: ${friend.sessions})`;
-                friendsContainer.appendChild(friendDiv);
-            });
-            if (friends.length > 0) {
-                displayQuiz(currentFriendIndex);
-            }
+    function displayFriends() {
+        const friendsList = document.getElementById('friends-list');
+        friendsList.innerHTML = '';
+        friends.forEach((friend, index) => {
+            const friendDiv = document.createElement('div');
+            friendDiv.innerHTML = `${friend.name}`;
+            friendsList.appendChild(friendDiv);
+        });
+    }
+
+    function createChannel() {
+        const channelName = document.getElementById('new-channel-name').value;
+        if (channelName) {
+            channels.push({ name: channelName, members: [...friends], score: 0 });
+            currentChannelIndex = channels.length - 1;
+            displayChannels();
+            document.getElementById('new-channel-name').value = '';
+        } else {
+            alert('Please enter a channel name.');
         }
+    }
 
-        function addQuestion() {
-            const questionText = document.getElementById('question-text').value;
-            const option1 = document.getElementById('option1').value;
-            const option2 = document.getElementById('option2').value;
-            const option3 = document.getElementById('option3').value;
-            const option4 = document.getElementById('option4').value;
-            const correctAnswer = document.getElementById('correct-answer').value;
-            const hint = document.getElementById('hint').value;
-            const mediaUrl = document.getElementById('media-url').value;
+    function displayChannels() {
+        const yourChannels = document.getElementById('your-channels');
+        yourChannels.innerHTML = '';
+        channels.forEach((channel, index) => {
+            const channelDiv = document.createElement('div');
+            channelDiv.classList.add('channel-item');
+            channelDiv.innerHTML = `${channel.name} (${channel.members.length} members) <button onclick="joinChannel(${index})">Join</button>`;
+            yourChannels.appendChild(channelDiv);
+        });
+    }
 
-            if (questionText && option1 && option2 && option3 && option4 && correctAnswer) {
-                const question = {
-                    text: questionText,
-                    options: [option1, option2, option3, option4],
-                    correctAnswer: parseInt(correctAnswer) - 1,
-                    answerPool: [0, 0, 0, 0],
-                    doubt: false,
-                    hint: hint || '',
-                    mediaUrl: mediaUrl || ''
-                };
-                questions.push(question);
-                clearInputFields();
-            } else {
-                alert("Please fill in all fields.");
-            }
+    function joinChannel(channelIndex) {
+        currentChannelIndex = channelIndex;
+        alert(`Joined channel: ${channels[channelIndex].name}`);
+        displayFriends(); // Display friends in the current channel
+    }
+
+    function displayQuiz(friendIndex) {
+        const quizContainer = document.getElementById('quiz-container');
+        quizContainer.innerHTML = '';
+        questions.forEach((question, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('quiz-question');
+            questionDiv.innerHTML = `
+                <h4>${index + 1}. ${question.text}</h4>
+                <label><input type="radio" name="question${index}" value="0"> ${question.options[0]}</label><br>
+                <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
+                <label><input type="radio" name="question${index}" value="2"> ${question.options[2]}</label><br>
+                <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label><br>
+                ${question.hint ? `<p><strong>Hint:</strong> ${question.hint}</p>` : ''}
+                <button onclick="markAsDoubt(${index})">Mark as Doubt</button>
+            `;
+            quizContainer.appendChild(questionDiv);
+        });
+        quizContainer.innerHTML += '<button onclick="submitQuiz()">Submit Quiz</button>';
+    }
+
+    function markAsDoubt(questionIndex) {
+        if (!questions[questionIndex].doubt) {
+            questions[questionIndex].doubt = true;
+            doubts.push(questionIndex);
+            alert("Marked as doubt!");
+        } else {
+            alert("This question is already marked as doubt.");
         }
+    }
 
-        function clearInputFields() {
-            document.getElementById('question-text').value = '';
-            document.getElementById('option1').value = '';
-            document.getElementById('option2').value = '';
-            document.getElementById('option3').value = '';
-            document.getElementById('option4').value = '';
-            document.getElementById('correct-answer').value = '';
-            document.getElementById('hint').value = '';
-            document.getElementById('media-url').value = '';
-        }
-
-        function displayQuiz(friendIndex) {
-            const quizContainer = document.getElementById('quiz-container');
-            quizContainer.innerHTML = `<h3>${friends[friendIndex].name}'s Quiz</h3>`;
-            questions.forEach((question, index) => {
-                const questionDiv = document.createElement('div');
-                questionDiv.classList.add('quiz-question');
-                questionDiv.innerHTML = `
-                    <h4>${index + 1}. ${question.text}</h4>
-                    ${question.mediaUrl ? `<img src="${question.mediaUrl}" alt="Question Media">` : ''}
-                    <label><input type="radio" name="question${index}" value="0"> ${question.options[0]}</label><br>
-                    <label><input type="radio" name="question${index}" value="1"> ${question.options[1]}</label><br>
-                    <label><input type="radio" name="question${index}" value="2"> ${question.options[2]}</label><br>
-                    <label><input type="radio" name="question${index}" value="3"> ${question.options[3]}</label><br>
-                    ${question.hint ? `<p><strong>Hint:</strong> ${question.hint}</p>` : ''}
-                    <button onclick="markAsDoubt(${index})">Mark as Doubt</button>
-                `;
-                quizContainer.appendChild(questionDiv);
-            });
-            quizContainer.innerHTML += '<button onclick="submitQuiz()">Submit Quiz</button>';
-        }
-
-        function markAsDoubt(questionIndex) {
-            if (!questions[questionIndex].doubt) {
-                questions[questionIndex].doubt = true;
-                doubts.push(questionIndex);
-                alert("Marked as doubt!");
-            } else {
-                alert("This question is already marked as doubt.");
-            }
-        }
-
-        function submitQuiz() {
-            const friend = friends[currentFriendIndex];
-            let score = 0;
-            const responses = [];
-            questions.forEach((question, index) => {
-                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-                if (selectedOption) {
-                    const selectedValue = parseInt(selectedOption.value);
-                    question.answerPool[selectedValue]++;
-                    responses.push(selectedValue);
-                    if (selectedValue === question.correctAnswer) {
-                        score++;
-                    }
+    function submitQuiz() {
+        const friend = friends[currentFriendIndex];
+        let score = 0;
+        const responses = [];
+        questions.forEach((question, index) => {
+            const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+            if (selectedOption) {
+                const selectedValue = parseInt(selectedOption.value);
+                question.answerPool[selectedValue]++;
+                responses.push(selectedValue);
+                if (selectedValue === question.correctAnswer) {
+                    score++;
                 }
-            });
-            friend.score = score;
-            friend.responses = responses;
-            reviews.push({ friendName: friend.name, score: score, responses: responses });
-            currentFriendIndex++;
-            if (currentFriendIndex < friends.length) {
-                displayQuiz(currentFriendIndex);
-            } else {
-                displayResults();
-                displayLeaderboard();
-                displayReviewSection();
             }
+        });
+        friend.score = score;
+        friend.responses = responses;
+        reviews.push({ friendName: friend.name, score: score, responses: responses });
+        currentFriendIndex++;
+        if (currentFriendIndex < friends.length) {
+            displayQuiz(currentFriendIndex);
+        } else {
+            displayResults();
+            displayLeaderboard();
+            displayReviewSection();
         }
+    }
 
-        function displayResults() {
-            const quizResult = document.getElementById('quiz-result');
-            quizResult.innerHTML = `<h3>Quiz Completed!</h3>`;
-            questions.forEach((question, index) => {
-                const questionPool = document.createElement('div');
-                questionPool.classList.add('quiz-question');
-                questionPool.innerHTML = `
-                    <h4>${index + 1}. ${question.text}</h4>
-                    <p>Option 1: ${question.options[0]} - ${question.answerPool[0]} votes</p>
-                    <p>Option 2: ${question.options[1]} - ${question.answerPool[1]} votes</p>
-                    <p>Option 3: ${question.options[2]} - ${question.answerPool[2]} votes</p>
-                    <p>Option 4: ${question.options[3]} - ${question.answerPool[3]} votes</p>
-                    <p>Correct Answer: <strong>${question.options[question.correctAnswer]}</strong></p>
-                `;
-                document.getElementById('results-list').appendChild(questionPool);
-            });
-        }
+    function displayResults() {
+        const quizResult = document.getElementById('quiz-result');
+        quizResult.innerHTML = `<h3>Quiz Completed!</h3>`;
+        questions.forEach((question, index) => {
+            const questionPool = document.createElement('div');
+            questionPool.classList.add('quiz-question');
+            questionPool.innerHTML = `
+                <h4>${index + 1}. ${question.text}</h4>
+                <p>Option 1: ${question.options[0]} - ${question.answerPool[0]} votes</p>
+                <p>Option 2: ${question.options[1]} - ${question.answerPool[1]} votes</p>
+                <p>Option 3: ${question.options[2]} - ${question.answerPool[2]} votes</p>
+                <p>Option 4: ${question.options[3]} - ${question.answerPool[3]} votes</p>
+                <p>Correct Answer: <strong>${question.options[question.correctAnswer]}</strong></p>
+            `;
+            document.getElementById('results-list').appendChild(questionPool);
+        });
+    }
 
-        function displayLeaderboard() {
-            const leaderboardContainer = document.getElementById('leaderboard-container');
-            leaderboardContainer.innerHTML = '';
-            friends.sort((a, b) => b.score - a.score);
-            friends.forEach((friend, index) => {
-                const friendDiv = document.createElement('div');
-                friendDiv.innerHTML = `${index + 1}. ${friend.name} - ${friend.score} points`;
-                leaderboardContainer.appendChild(friendDiv);
-            });
-        }
+    function displayLeaderboard() {
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        leaderboardContainer.innerHTML = '';
+        friends.sort((a, b) => b.score - a.score);
+        friends.forEach((friend, index) => {
+            const friendDiv = document.createElement('div');
+            friendDiv.innerHTML = `${index + 1}. ${friend.name} - ${friend.score} points`;
+            leaderboardContainer.appendChild(friendDiv);
+        });
+    }
 
-        function displayReviewSection() {
-            const reviewContainer = document.getElementById('review-container');
-            reviewContainer.innerHTML = '';
-            reviews.forEach(review => {
-                const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('review-item');
-                reviewDiv.innerHTML = `
-                    <h4>Review of ${review.friendName}'s Quiz</h4>
-                    <p>Score: ${review.score}</p>
-                    ${review.responses.map((response, index) => `
-                    <p>Q${index + 1}: ${questions[index].options[response]} (Correct: ${questions[index].options[questions[index].correctAnswer]})</p>`).join('')}
-                    <textarea placeholder="Leave a review..."></textarea>
-                    <button onclick="submitReview('${review.friendName}')">Submit Review</button>
-                `;
-                reviewContainer.appendChild(reviewDiv);
-            });
-        }
+    function displayReviewSection() {
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '';
+        reviews.forEach(review => {
+            const reviewDiv = document.createElement('div');
+            reviewDiv.classList.add('review-item');
+            reviewDiv.innerHTML = `<h4>Review for ${review.friendName}</h4><p>Score: ${review.score}</p>`;
+            reviewContainer.appendChild(reviewDiv);
+        });
+    }
 
-        function submitReview(friendName) {
-            alert(`Review for ${friendName} submitted!`);
-        }
+    function displayDoubtSection() {
+        const doubtSection = document.getElementById('doubt-section');
+        doubtSection.innerHTML = '<h3>Doubts</h3>';
+        doubts.forEach((doubtIndex, index) => {
+            const doubtDiv = document.createElement('div');
+            doubtDiv.classList.add('doubt-item');
+            doubtDiv.innerHTML = `
+                <p>${index + 1}. ${questions[doubtIndex].text}</p>
+                <button onclick="resolveDoubt(${index})">Resolve Doubt</button>
+            `;
+            doubtSection.appendChild(doubtDiv);
+        });
+    }
 
-        function displayDoubtSection() {
-            const doubtSection = document.getElementById('doubt-section');
-            doubtSection.innerHTML = '<h3>Doubt Resolution</h3>';
-            doubts.forEach(doubtIndex => {
-                const doubtItem = document.createElement('div');
-                doubtItem.classList.add('doubt-item');
-                const question = questions[doubtIndex];
-                doubtItem.innerHTML = `
-                    <h4>${question.text}</h4>
-                    <p>Current Doubt: ${question.doubtResolved ? "Resolved" : "Unresolved"}</p>
-                    ${!question.doubtResolved ? `
-                    <p><strong>Options:</strong></p>
-                    <p>1: ${question.options[0]}</p>
-                    <p>2: ${question.options[1]}</p>
-                    <p>3: ${question.options[2]}</p>
-                    <p>4: ${question.options[3]}</p>
-                    <input type="text" id="resolved-answer-${doubtIndex}" placeholder="Enter the correct option number (1-4)">
-                    <button onclick="resolveDoubt(${doubtIndex})">Resolve Doubt</button>
-                    ` : `<p><strong>Resolved by:</strong> ${question.resolver}</p><p><strong>Resolved Answer:</strong> ${question.options[question.resolvedAnswer]}</p>`}
-                `;
-                doubtSection.appendChild(doubtItem);
-            });
-        }
+    function resolveDoubt(doubtIndex) {
+        const doubtQuestion = questions[doubts[doubtIndex]];
+        doubtQuestion.doubtResolved = true;
+        doubts.splice(doubtIndex, 1);
+        displayDoubtSection();
+        alert('Doubt resolved!');
+    }
 
-        function resolveDoubt(doubtIndex) {
-            const resolvedAnswerInput = document.getElementById(`resolved-answer-${doubtIndex}`);
-            const resolvedAnswer = parseInt(resolvedAnswerInput.value) - 1;
-            if (resolvedAnswer >= 0 && resolvedAnswer <= 3) {
-                questions[doubtIndex].doubtResolved = true;
-                questions[doubtIndex].resolvedAnswer = resolvedAnswer;
-                questions[doubtIndex].resolver = friends[currentFriendIndex - 1].name;
-                alert('Doubt resolved!');
-                displayDoubtSection();
-            } else {
-                alert('Please enter a valid option number (1-4).');
-            }
-        }
+    function displayChatSection() {
+        const chatMessagesContainer = document.getElementById('chat-messages');
+        chatMessagesContainer.innerHTML = '';
+        chatMessages.forEach(message => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message');
+            messageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
+            chatMessagesContainer.appendChild(messageDiv);
+        });
+    }
 
-        function displayChatSection() {
-            const chatMessagesContainer = document.getElementById('chat-messages');
-            chatMessagesContainer.innerHTML = '';
-            chatMessages.forEach(message => {
-                const chatMessageDiv = document.createElement('div');
-                chatMessageDiv.classList.add('chat-message');
-                chatMessageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
-                chatMessagesContainer.appendChild(chatMessageDiv);
-            });
-        }
-
-        function sendMessage() {
-            const chatMessageInput = document.getElementById('chat-message-input');
-            const chatMessageText = chatMessageInput.value.trim();
-            if (chatMessageText) {
-                const senderName = friends[currentFriendIndex - 1].name;
-                chatMessages.push({ sender: senderName, text: chatMessageText });
-                chatMessageInput.value = '';
-                displayChatSection();
-            } else {
-                alert('Please enter a message.');
-            }
-        }
-
-        function sendQuickReply(replyText) {
-            const senderName = friends[currentFriendIndex - 1].name;
-            chatMessages.push({ sender: senderName, text: replyText });
+    function sendMessage() {
+        const messageText = document.getElementById('chat-message-input').value;
+        if (messageText) {
+            chatMessages.push({ sender: 'You', text: messageText });
             displayChatSection();
+            document.getElementById('chat-message-input').value = '';
+        } else {
+            alert('Please enter a message.');
         }
+    }
 
-        function displayGroupChatSection() {
-            const groupChatMessagesContainer = document.getElementById('group-chat-messages');
-            groupChatMessagesContainer.innerHTML = '';
-            groupChatMessages.forEach(message => {
-                const groupChatMessageDiv = document.createElement('div');
-                groupChatMessageDiv.classList.add('group-chat-message');
-                groupChatMessageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
-                groupChatMessagesContainer.appendChild(groupChatMessageDiv);
-            });
+    function displayGroupChatSection() {
+        const groupChatMessagesContainer = document.getElementById('group-chat-messages');
+        groupChatMessagesContainer.innerHTML = '';
+        groupChatMessages.forEach(message => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('group-chat-message');
+            messageDiv.innerHTML = `<strong>${message.sender}:</strong> ${message.text}`;
+            groupChatMessagesContainer.appendChild(messageDiv);
+        });
+    }
+
+    function sendGroupMessage() {
+        const messageText = document.getElementById('group-chat-message-input').value;
+        if (messageText) {
+            groupChatMessages.push({ sender: 'You', text: messageText });
+            displayGroupChatSection();
+            document.getElementById('group-chat-message-input').value = '';
+        } else {
+            alert('Please enter a message.');
         }
+    }
 
-        function sendGroupMessage() {
-            const groupChatMessageInput = document.getElementById('group-chat-message-input');
-            const groupChatMessageText = groupChatMessageInput.value.trim();
-            if (groupChatMessageText) {
-                const senderName = friends[currentFriendIndex - 1].name;
-                groupChatMessages.push({ sender: senderName, text: groupChatMessageText });
-                groupChatMessageInput.value = '';
-                displayGroupChatSection();
-            } else {
-                alert('Please enter a message.');
+    function startSession() {
+        const sessionName = document.getElementById('session-name').value;
+        if (sessionName) {
+            const session = { sessionName: sessionName, startedBy: 'You', friends: [...friends] };
+            sessions.push(session);
+            displaySessions();
+            document.getElementById('session-name').value = '';
+        } else {
+            alert('Please enter a session name.');
+        }
+    }
+
+    function displaySessions() {
+        const sessionContainer = document.getElementById('session-container');
+        sessionContainer.innerHTML = '<h4>Your Sessions</h4>';
+        sessions.forEach((session, index) => {
+            const sessionDiv = document.createElement('div');
+            sessionDiv.classList.add('session-item');
+            sessionDiv.innerHTML = `${index + 1}. ${session.sessionName} (Started by ${session.startedBy})`;
+            sessionContainer.appendChild(sessionDiv);
+        });
+
+        const friendsSessionsContainer = document.getElementById('friends-sessions');
+        friendsSessionsContainer.innerHTML = '<h4>Friends\' Sessions</h4>';
+        sessions.forEach(session => {
+            if (session.startedBy !== 'You') {
+                const sessionItem = document.createElement('div');
+                sessionItem.classList.add('session-item');
+                sessionItem.innerHTML = `${session.sessionName} (Started by ${session.startedBy})`;
+                friendsSessionsContainer.appendChild(sessionItem);
             }
-        }
+        });
+    }
 
-        // Study Session Features
-        function startSession() {
-            const sessionName = document.getElementById('session-name').value;
-            if (sessionName) {
-                const friend = friends[currentFriendIndex - 1];
-                friend.sessions++;
-                sessions.push({ sessionName: sessionName, startedBy: friend.name });
-                displaySessions();
-                document.getElementById('session-name').value = '';
-            } else {
-                alert('Please enter a session name.');
-            }
-        }
+</script>
 
-        function displaySessions() {
-            const sessionContainer = document.getElementById('session-container');
-            sessionContainer.innerHTML = '<h4>Your Study Sessions</h4>';
-            const friend = friends[currentFriendIndex - 1];
-            sessions.forEach(session => {
-                if (session.startedBy === friend.name) {
-                    const sessionItem = document.createElement('div');
-                    sessionItem.classList.add('session-item');
-                    sessionItem.innerHTML = `${session.sessionName} (Started by ${session.startedBy})`;
-                    sessionContainer.appendChild(sessionItem);
-                }
-            });
-
-            const friendsSessionsContainer = document.getElementById('friends-sessions');
-            friendsSessionsContainer.innerHTML = '<h4>Friends\' Sessions</h4>';
-            sessions.forEach(session => {
-                if (session.startedBy !== friend.name) {
-                    const sessionItem = document.createElement('div');
-                    sessionItem.classList.add('session-item');
-                    sessionItem.innerHTML = `${session.sessionName} (Started by ${session.startedBy})`;
-                    friendsSessionsContainer.appendChild(sessionItem);
-                }
-            });
-        }
-    </script>
 </body>
 </html>
